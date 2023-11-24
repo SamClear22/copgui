@@ -1,0 +1,462 @@
+// Samuel De Santiago
+// COP-3330 - GUI Project
+// 11/20/2023
+
+package copProject;
+
+import javax.swing.*;
+import copProject.AbstractReward.Reward;
+import java.awt.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.List;
+
+interface Drawable {
+    void draw(Graphics g, int x, int y, int cellSize);
+
+    void draw(Graphics g, int cellSize);
+}
+
+//Abstract class for rewards
+abstract class AbstractReward implements Serializable, Drawable {
+	private static final long serialVersionUID = 1L;
+
+	  public AbstractReward.Reward createReward(String rewardType, int x, int y) {
+		    switch (rewardType) {
+		        case "Coin":
+		            return new CoinReward().createReward(x, y);
+		        case "Fruit":
+		            return new FruitReward().createReward(x, y);
+		        case "Candy":
+		            return new CandyReward().createReward(x, y);
+		        default:
+		            throw new IllegalArgumentException("Invalid reward type: " + rewardType);
+		    }
+		}
+
+
+	  // Abstract method to create the reward
+	  public Reward createReward(int x, int y) {
+	      return createReward(x, y, null);
+	  }
+	
+	// Abstract method to create the reward
+	  protected abstract Reward createReward(int x, int y, String rewardType);
+	  
+	  // Inner class representing the reward
+	  protected class Reward implements Serializable, Drawable {
+	      private static final long serialVersionUID = 1L;
+	      private transient Image image;
+	      private int x, y;
+	      private String rewardType; // Add rewardType field
+	
+	      public Reward(Image image, int x, int y, String rewardType) {
+	          this.image = image;
+	          this.x = x;
+	          this.y = y;
+	          this.rewardType = rewardType;
+	      }
+	
+	      @Override
+	      public void draw(Graphics g, int cellSize) {
+	          loadImage(); // Reload the image
+	          g.drawImage(image, x * cellSize, y * cellSize, cellSize, cellSize, null);
+	      }
+	
+	      @Override
+	      public void draw(Graphics g, int x, int y, int cellSize) {
+	          loadImage(); // Reload the image
+	          g.drawImage(image, x, y, cellSize, cellSize, null);
+	      }
+	
+	      private void loadImage() {
+	            if (image == null && rewardType != null) {
+	                // Load the image based on the rewardType
+	                String imageName = rewardType.toLowerCase() + ".png";
+	                try {
+	                    ImageIcon icon = new ImageIcon(getClass().getResource("/copProject_images/" + imageName));
+	                    if (icon.getImageLoadStatus() == MediaTracker.COMPLETE) {
+	                        image = icon.getImage();
+	                    } else {
+	                        System.err.println("Failed to load image: " + imageName);
+	                    }
+	                } catch (Exception e) {
+	                    System.err.println("Failed to load image: " + imageName);
+	                    e.printStackTrace(); // Print the stack trace
+	                }
+	            }
+	        }
+	      
+	      public String getType() {
+	          return rewardType;
+	      }
+  }
+}
+
+//Concrete subclass of AbstractReward
+//Concrete subclass of AbstractReward
+class CoinReward extends AbstractReward {
+	  private static final long serialVersionUID = 2L;
+	
+	  public CoinReward() {
+	      super();
+	  }
+	
+	  @Override
+	  protected Reward createReward(int x, int y, String rewardType) {
+		    try {
+		        // Load the image for the coin (replace "coin.png" with your image file)
+		        ImageIcon icon = new ImageIcon("coin.png");
+		        Image image = icon.getImage();
+		        return new Reward(image, x, y, "Coin");
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        return null;
+		    }
+		}
+	
+	  @Override
+	  public void draw(Graphics g, int cellSize) {
+	      // Leave it empty, as it relies on the implementation in AbstractReward.Reward
+	  }
+	
+	  // Implement the draw method from the Drawable interface
+	  @Override
+	  public void draw(Graphics g, int x, int y, int cellSize) {
+	      Reward reward = createReward(x, y);
+	      reward.draw(g, cellSize);
+	  }
+}
+
+
+// Concrete subclass of AbstractReward
+//Concrete subclass of AbstractReward
+class FruitReward extends AbstractReward {
+	 private static final long serialVersionUID = 3L;
+	
+	 public FruitReward() {
+	     super();
+	 }
+	
+	 @Override
+	 protected Reward createReward(int x, int y, String rewardType) {
+	     try {
+	         // Load the image for the fruit (replace "fruit.png" with your image file)
+	         ImageIcon icon = new ImageIcon("fruit.png");
+	         Image image = icon.getImage();
+	         return new Reward(image, x, y, "Fruit");
+	     } catch (Exception e) {
+	         e.printStackTrace();
+	         return null;
+	     }
+	 }
+	
+	 @Override
+	 public void draw(Graphics g, int cellSize) {
+	     // Leave it empty, as it relies on the implementation in AbstractReward.Reward
+	 }
+	
+	 // Implement the draw method from the Drawable interface
+	 @Override
+	 public void draw(Graphics g, int x, int y, int cellSize) {
+	     Reward reward = createReward(x, y);
+	     reward.draw(g, cellSize);
+	 }
+}
+
+//Concrete subclass of AbstractReward
+class CandyReward extends AbstractReward {
+	private static final long serialVersionUID = 4L;
+
+	 public CandyReward() {
+	     super();
+	 }
+
+	 @Override
+	 protected Reward createReward(int x, int y, String rewardType) {
+	     try {
+	         // Load the image for the candy (replace "candy.png" with your image file)
+	         ImageIcon icon = new ImageIcon("candy.png");
+	         Image image = icon.getImage();
+	         return new Reward(image, x, y, "Candy");
+	     } catch (Exception e) {
+	         e.printStackTrace();
+	         return null;
+	     }
+	 }
+	
+	 @Override
+	 public void draw(Graphics g, int cellSize) {
+	     // Leave it empty, as it relies on the implementation in AbstractReward.Reward
+	 }
+	
+	 // Implement the draw method from the Drawable interface
+	 @Override
+	 public void draw(Graphics g, int x, int y, int cellSize) {
+	     Reward reward = createReward(x, y);
+	     reward.draw(g, cellSize);
+	 }
+}
+
+public class BoardGameGUI extends JFrame {
+
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private BoardPanel boardPanel;
+    private Map<String, ImageIcon> rewardImages;
+
+    public BoardGameGUI() {
+        initUI();
+        loadRewardImages(); // Load reward images when initializing the GUI
+    }
+
+    private void initUI() {
+        setTitle("Board Game GUI");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        // Create the board panel
+        boardPanel = new BoardPanel();
+        add(boardPanel, BorderLayout.CENTER);
+
+        // Create a menu bar with options
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menu = new JMenu("Menu");
+        JMenuItem designItem = new JMenuItem("Design");
+        JMenuItem loadItem = new JMenuItem("Load");
+        JMenuItem saveItem = new JMenuItem("Save");
+
+        designItem.addActionListener(e -> generateNewBoard());
+        loadItem.addActionListener(e -> loadBoardFromFile());
+        saveItem.addActionListener(e -> saveBoardToFile());
+
+        menu.add(designItem);
+        menu.add(loadItem);
+        menu.add(saveItem);
+        menuBar.add(menu);
+
+        setJMenuBar(menuBar);
+
+        // Set frame properties
+        setSize(800, 800);
+        setLocationRelativeTo(null);
+        setVisible(true);
+        
+        
+    }
+
+    private void loadRewardImages() {
+        // Load images for rewards
+        rewardImages = new HashMap<>();
+        rewardImages.put("Coin", new ImageIcon("coin.png")); // Replace "coin.png" with your image file
+        rewardImages.put("Fruit", new ImageIcon("fruit.png")); // Replace "food.png" with your image file
+        rewardImages.put("Candy", new ImageIcon("candy.png")); // Replace "plant.png" with your image file
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(BoardGameGUI::new);
+    }
+
+    		
+    
+    public class BoardPanel extends JPanel {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private static final int CELL_SIZE = 20;
+        private static final int BOARD_SIZE = 33; // Increase the size to 33x33
+        private static final Color BORDER_CELL_COLOR = new Color(50, 50, 50); // Darker gray
+
+        private Random random = new Random();
+        private Set<Point> occupiedCells = new HashSet<>();
+        private Map<Point, AbstractReward.Reward> rewards = new HashMap<>();
+
+        public void generateRandomRewards() {
+            generateRandomReward(new CoinReward(), 16);
+            generateRandomReward(new FruitReward(), 16);
+            generateRandomReward(new CandyReward(), 16);
+        }
+        
+        public void clearBoard() {
+            occupiedCells.clear(); // Clear occupied cells
+            rewards.clear(); // Clear rewards
+        }
+        
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            // Draw the board with a border around it
+            for (int row = 0; row < BOARD_SIZE; row++) {
+                for (int col = 0; col < BOARD_SIZE; col++) {
+                    if (row == 0 || row == BOARD_SIZE - 1 || col == 0 || col == BOARD_SIZE - 1) {
+                        g.setColor(BORDER_CELL_COLOR);
+                    } else {
+                        g.setColor(Color.WHITE); // Set the default color for the inner cells
+                    }
+                    g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    g.setColor(Color.BLACK); // Set the color for the grid lines
+                    g.drawRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
+            }
+
+            for (Map.Entry<Point, AbstractReward.Reward> entry : rewards.entrySet()) {
+                AbstractReward.Reward reward = entry.getValue();
+                if (reward != null) {
+                    reward.draw(g, CELL_SIZE);
+                }
+            }
+        }
+        
+        private void generateRandomReward(AbstractReward rewardType, int count) {
+            for (int i = 0; i < count; i++) {
+                int row, col;
+                do {
+                    row = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
+                    col = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
+                } while (isCellOccupied(row, col));
+
+                AbstractReward.Reward reward = rewardType.createReward(col, row, null);
+                rewards.put(new Point(row, col), reward);
+                occupiedCells.add(new Point(row, col));
+            }
+        }
+
+        private boolean isCellOccupied(int row, int col) {
+            // Check if the cell is already occupied by a reward
+            Point cell = new Point(row, col);
+            return occupiedCells.contains(cell);
+        }
+    }
+
+    private void generateNewBoard() {
+        boardPanel.clearBoard(); // Clear existing rewards and occupied cells
+        boardPanel.generateRandomRewards(); // Generate new rewards
+        boardPanel.repaint(); // Repaint the board
+    }
+    
+    private void loadBoardFromFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showOpenDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            // User selected a file
+            try {
+                String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+                ObjectInputStream in = new ObjectInputStream(new FileInputStream(filePath));
+
+                // Read the object from the file
+                @SuppressWarnings("unchecked")
+                List<LoadedReward> loadedRewards = (List<LoadedReward>) in.readObject();
+                in.close();
+
+                // Clear existing rewards and occupied cells
+                boardPanel.clearBoard();
+
+                // Set the loaded rewards to the board panel
+                for (LoadedReward loadedReward : loadedRewards) {
+                    String rewardType = loadedReward.getRewardType();
+                    int x = loadedReward.getX();
+                    int y = loadedReward.getY();
+                    AbstractReward.Reward reward = createReward(rewardType, x, y);
+
+                    if (reward != null) {
+                        boardPanel.rewards.put(new Point(y, x), reward);
+                        boardPanel.occupiedCells.add(new Point(y, x));
+                    } else {
+                        System.err.println("Failed to create reward for type: " + rewardType);
+                    }
+                }
+
+                // Repaint the board
+                boardPanel.repaint();
+
+                JOptionPane.showMessageDialog(this, "Board design loaded successfully.");
+            } catch (IOException | ClassNotFoundException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error loading board design.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    
+    private Reward createReward(String rewardType, int x, int y) {
+        switch (rewardType) {
+            case "Coin":
+                return new CoinReward().createReward(x, y);
+            case "Fruit":
+                return new FruitReward().createReward(x, y);
+            case "Candy":
+                return new CandyReward().createReward(x, y);
+            default:
+                throw new IllegalArgumentException("Invalid reward type: " + rewardType);
+        }
+    }
+
+
+
+	private static class LoadedReward implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private String rewardType;
+        private int x;
+        private int y;
+
+        public LoadedReward(String rewardType, int x, int y) {
+            this.rewardType = rewardType;
+            this.x = x;
+            this.y = y;
+        }
+
+        public String getRewardType() {
+            return rewardType;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+    }
+    
+    private void saveBoardToFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showSaveDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            // User selected a file
+            try {
+                String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+                List<Object> loadedRewards = new ArrayList<>();
+
+                // Convert the existing rewards to LoadedReward objects
+                for (Map.Entry<Point, AbstractReward.Reward> entry : boardPanel.rewards.entrySet()) {
+                    Point position = entry.getKey();
+                    AbstractReward.Reward reward = entry.getValue();
+                    loadedRewards.add(new LoadedReward(reward.getType(), position.x, position.y));
+                }
+
+                ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filePath));
+                out.writeObject(loadedRewards); // Save the rewards information
+                out.close();
+                JOptionPane.showMessageDialog(this, "Board design saved successfully.");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error saving board design.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+}
