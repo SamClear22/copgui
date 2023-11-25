@@ -4,6 +4,7 @@
 
 package copProject;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import copProject.AbstractReward.Reward;
 import java.awt.*;
@@ -23,7 +24,6 @@ import java.util.List;
 
 interface Drawable {
     void draw(Graphics g, int x, int y, int cellSize);
-
     void draw(Graphics g, int cellSize);
 }
 
@@ -42,7 +42,7 @@ abstract class AbstractReward implements Serializable, Drawable {
 		        default:
 		            throw new IllegalArgumentException("Invalid reward type: " + rewardType);
 		    }
-		}
+	  }
 
 
 	  // Abstract method to create the reward
@@ -50,7 +50,7 @@ abstract class AbstractReward implements Serializable, Drawable {
 	      return createReward(x, y, null);
 	  }
 	
-	// Abstract method to create the reward
+	  // Abstract method to create the reward
 	  protected abstract Reward createReward(int x, int y, String rewardType);
 	  
 	  // Inner class representing the reward
@@ -80,30 +80,25 @@ abstract class AbstractReward implements Serializable, Drawable {
 	      }
 	
 	      private void loadImage() {
-	            if (image == null && rewardType != null) {
-	                // Load the image based on the rewardType
-	                String imageName = rewardType.toLowerCase() + ".png";
-	                try {
-	                    ImageIcon icon = new ImageIcon(getClass().getResource("/copProject_images/" + imageName));
-	                    if (icon.getImageLoadStatus() == MediaTracker.COMPLETE) {
-	                        image = icon.getImage();
-	                    } else {
-	                        System.err.println("Failed to load image: " + imageName);
-	                    }
-	                } catch (Exception e) {
-	                    System.err.println("Failed to load image: " + imageName);
-	                    e.printStackTrace(); // Print the stack trace
-	                }
-	            }
-	        }
+	    	    if (image == null && rewardType != null) {
+	    	        // Load the image based on the rewardType
+	    	        String imageName = rewardType.toLowerCase() + ".png";
+	    	        try {
+	    	            image = ImageIO.read(getClass().getResource("/copProject_images/" + imageName));
+	    	        } catch (IOException e) {
+	    	            System.err.println("Failed to load image: " + imageName);
+	    	            e.printStackTrace();
+	    	        }
+	    	    }
+	      }
+
 	      
 	      public String getType() {
 	          return rewardType;
 	      }
-  }
+	  }
 }
 
-//Concrete subclass of AbstractReward
 //Concrete subclass of AbstractReward
 class CoinReward extends AbstractReward {
 	  private static final long serialVersionUID = 2L;
@@ -111,19 +106,19 @@ class CoinReward extends AbstractReward {
 	  public CoinReward() {
 	      super();
 	  }
-	
+	  
 	  @Override
 	  protected Reward createReward(int x, int y, String rewardType) {
-		    try {
-		        // Load the image for the coin (replace "coin.png" with your image file)
-		        ImageIcon icon = new ImageIcon("coin.png");
-		        Image image = icon.getImage();
-		        return new Reward(image, x, y, "Coin");
-		    } catch (Exception e) {
-		        e.printStackTrace();
-		        return null;
-		    }
-		}
+	      try {
+	          // Load the image for the coin (replace "coin.png" with your image file)
+	          ImageIcon icon = new ImageIcon("coin.png");
+	          Image image = icon.getImage();
+	          return new Reward(image, x, y, "Coin");
+	      } catch (Exception e) {
+	          e.printStackTrace();
+	          return null;
+	      }
+	  }
 	
 	  @Override
 	  public void draw(Graphics g, int cellSize) {
@@ -138,8 +133,6 @@ class CoinReward extends AbstractReward {
 	  }
 }
 
-
-// Concrete subclass of AbstractReward
 //Concrete subclass of AbstractReward
 class FruitReward extends AbstractReward {
 	 private static final long serialVersionUID = 3L;
@@ -228,7 +221,7 @@ public class BoardGameGUI extends JFrame {
         setLayout(new BorderLayout());
 
         // Create the board panel
-        boardPanel = new BoardPanel();
+        boardPanel = new BoardPanel();	
         add(boardPanel, BorderLayout.CENTER);
 
         // Create a menu bar with options
@@ -252,9 +245,7 @@ public class BoardGameGUI extends JFrame {
         // Set frame properties
         setSize(800, 800);
         setLocationRelativeTo(null);
-        setVisible(true);
-        
-        
+        setVisible(true);  
     }
 
     private void loadRewardImages() {
@@ -267,9 +258,7 @@ public class BoardGameGUI extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(BoardGameGUI::new);
-    }
-
-    		
+    }    		
     
     public class BoardPanel extends JPanel {
         /**
@@ -305,7 +294,7 @@ public class BoardGameGUI extends JFrame {
                     if (row == 0 || row == BOARD_SIZE - 1 || col == 0 || col == BOARD_SIZE - 1) {
                         g.setColor(BORDER_CELL_COLOR);
                     } else {
-                        g.setColor(Color.WHITE); // Set the default color for the inner cells
+                        g.setColor(new Color(144, 238, 144)); // Set the color for the inner cells to light green
                     }
                     g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                     g.setColor(Color.BLACK); // Set the color for the grid lines
@@ -404,8 +393,6 @@ public class BoardGameGUI extends JFrame {
                 throw new IllegalArgumentException("Invalid reward type: " + rewardType);
         }
     }
-
-
 
 	private static class LoadedReward implements Serializable {
         private static final long serialVersionUID = 1L;
