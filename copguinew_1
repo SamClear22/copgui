@@ -356,7 +356,7 @@ public class BoardGameGUI extends JFrame {
                     // Generate random coordinates for the wall
                     x = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
                     y = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
-                } while (isCellOccupied(x, y) || isCornerCell(x, y) || isWallInCell(x, y));
+                } while (isCellOccupied(x, y) || isCornerCell(x, y) || isWallInCell(x, y) || isAroundWhiteSquare(x, y));
 
                 Wall wall = new Wall(x, y, wallIndex);
                 // Add the wall to the list of walls
@@ -365,6 +365,19 @@ public class BoardGameGUI extends JFrame {
             }
         }
 
+        // Additional method to check if a cell is around the white squares
+        private boolean isAroundWhiteSquare(int x, int y) {
+            for (int row = -1; row <= 1; row++) {
+                for (int col = -1; col <= 1; col++) {
+                    int checkX = x + col;
+                    int checkY = y + row;
+                    if (isCornerCell(checkX, checkY)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
         
         private class Wall implements Drawable {
             private transient Image image;
