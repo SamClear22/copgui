@@ -31,7 +31,7 @@ interface Drawable {
 
 //Abstract class for rewards
 abstract class AbstractReward implements Serializable, Drawable {
-	private static final long serialVersionUID = 1L;
+	  private static final long serialVersionUID = 1L;
 
 	  public AbstractReward.Reward createReward(String rewardType, int x, int y) {
 		    switch (rewardType) {
@@ -61,8 +61,8 @@ abstract class AbstractReward implements Serializable, Drawable {
 	      transient Image image;
 	      private int x, y;
 	      private String rewardType; // Add rewardType field
-		public boolean isEntrance;
-		public boolean isExit;
+	      public boolean isEntrance;
+	      public boolean isExit;
 	
 	      public Reward(Image image, int x, int y, String rewardType) {
 	          this.image = image;
@@ -84,17 +84,20 @@ abstract class AbstractReward implements Serializable, Drawable {
 	      }
 	
 	      private void loadImage() {
-	    	    if (image == null && rewardType != null) {
-	    	        // Load the image based on the rewardType
-	    	        String imageName = rewardType.toLowerCase() + ".png";
+	    	    if (image == null) {
+	    	        String imageIndex = null;
+					// Load the image for the wall
+	    	        String imageName = "wall_" + imageIndex + ".png";
+	    	        String imagePath = "/copProject_images/" + imageName;
 	    	        try {
-	    	            image = ImageIO.read(getClass().getResource("/copProject_images/" + imageName));
+	    	            System.out.println("Loading image from path: " + imagePath); // Print the path for debugging
+	    	            image = ImageIO.read(getClass().getResource(imagePath));
 	    	        } catch (IOException e) {
 	    	            System.err.println("Failed to load image: " + imageName);
 	    	            e.printStackTrace();
 	    	        }
 	    	    }
-	      }
+	    	}
 	      
 	      public String getType() {
 	          return rewardType;
@@ -172,7 +175,7 @@ class FruitReward extends AbstractReward {
 
 //Concrete subclass of AbstractReward
 class CandyReward extends AbstractReward {
-	private static final long serialVersionUID = 4L;
+	 private static final long serialVersionUID = 4L;
 
 	 public CandyReward() {
 	     super();
@@ -202,6 +205,43 @@ class CandyReward extends AbstractReward {
 	     Reward reward = createReward(x, y);
 	     reward.draw(g, cellSize);
 	 }
+}
+
+class Wall implements Serializable, Drawable {
+	    private static final long serialVersionUID = 1L;
+	    transient Image image;
+	    private int x, y;
+	
+	    public Wall(Image image, int x, int y) {
+	        this.image = image;
+	        this.x = x;
+	        this.y = y;
+	    }
+	
+	    @Override
+	    public void draw(Graphics g, int cellSize) {
+	        loadImage(); // Reload the image
+	        g.drawImage(image, x * cellSize, y * cellSize, cellSize, cellSize, null);
+	    }
+	
+	    @Override
+	    public void draw(Graphics g, int x, int y, int cellSize) {
+	        loadImage(); // Reload the image
+	        g.drawImage(image, x, y, cellSize, cellSize, null);
+	    }
+	
+	    private void loadImage() {
+	        if (image == null) {
+	            // Load the image for the wall
+	            String imageName = "wall.png"; // You may want to change this based on your naming convention
+	            try {
+	                image = ImageIO.read(getClass().getResource("/copProject_images/" + imageName));
+	            } catch (IOException e) {
+	                System.err.println("Failed to load image: " + imageName);
+	                e.printStackTrace();
+	            }
+	        }
+	    }
 }
 
 public class BoardGameGUI extends JFrame {
@@ -272,10 +312,11 @@ public class BoardGameGUI extends JFrame {
 		private static final int CELL_SIZE = 20;
         private static final int BOARD_SIZE = 33; // Increase the size to 33x33
         private static final Color BORDER_CELL_COLOR = new Color(50, 50, 50); // Darker gray
-
+        
         private Random random = new Random();
         private Set<Point> occupiedCells = new HashSet<>();
         private Map<Point, AbstractReward.Reward> rewards = new HashMap<>();
+        private List<Wall> walls = new ArrayList<>();
         private Point entranceLocation;
         private Point exitLocation;
         
@@ -283,6 +324,74 @@ public class BoardGameGUI extends JFrame {
             generateRandomReward(new CoinReward(), 16);
             generateRandomReward(new FruitReward(), 16);
             generateRandomReward(new CandyReward(), 16);
+            generateRandomWalls();
+        }
+        
+        private void generateRandomWalls() {
+            // Clear existing walls
+            walls.clear();
+
+            // Generate three random wall indices (1, 2, 3)
+            List<Integer> wallIndices = Arrays.asList(1, 2, 3);
+            Collections.shuffle(wallIndices);
+
+            // Create three random wall instances
+            for (int i = 0; i < 3; i++) {
+                int wallIndex = wallIndices.get(i);
+                int x, y;
+                do {
+                    // Generate random coordinates for the wall
+                    x = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
+                    y = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
+                } while (isCellOccupied(x, y) || isCornerCell(x, y));
+
+                Wall wall = new Wall(x, y, wallIndex);
+                // Add the wall to the list of walls
+                walls.add(wall);
+            }
+
+            // Repaint the board
+            repaint();
+        }
+        
+        private class Wall implements Drawable {
+            private transient Image image;
+            private int x, y;
+            private int imageIndex; // Added imageIndex field
+
+            public Wall(int x, int y, int imageIndex) {
+                this.x = x;
+                this.y = y;
+                this.imageIndex = imageIndex;
+                loadImage();
+            }
+
+            @Override
+            public void draw(Graphics g, int cellSize) {
+                // Draw the wall image at the specified position
+                g.drawImage(image, x * cellSize, y * cellSize, cellSize, cellSize, null);
+            }
+
+            private void loadImage() {
+                // Load the image based on the imageIndex
+                String imageName = "wall_" + imageIndex + ".png";
+                String imagePath = "/copProject_images/" + imageName;
+                try {
+                    // Print the path for debugging
+                    System.out.println("Loading image from path: " + imagePath);
+                    image = ImageIO.read(getClass().getResource(imagePath));
+                } catch (IOException e) {
+                    System.err.println("Failed to load image: " + imageName);
+                    e.printStackTrace();
+                }
+            }
+
+
+			@Override
+			public void draw(Graphics g, int x, int y, int cellSize) {
+				// TODO Auto-generated method stub
+				
+			}
         }
         
         public void clearBoard() {
@@ -333,6 +442,11 @@ public class BoardGameGUI extends JFrame {
                     reward.draw(g, CELL_SIZE);
                 }
             }
+            
+            for (Wall wall : walls) {
+                wall.draw(g, CELL_SIZE);
+            }
+            
             drawEntranceExitImages(g);
             drawImage(g, entranceLocation, "entrance.png");
             drawImage(g, exitLocation, "exit.png");
@@ -402,7 +516,6 @@ public class BoardGameGUI extends JFrame {
                 }
             }
         }
-
         
         private boolean isCellOccupied(int row, int col) {
             // Check if the cell is already occupied by a reward
