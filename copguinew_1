@@ -399,11 +399,12 @@ public class BoardGameGUI extends JFrame {
             rewards.clear(); // Clear rewards
         }
         
+        // Update the paintComponent method in the BoardPanel class
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
 
-            // Draw the board with a dark grey border and light green inside cells
+            // Draw the board with a dark grey border and light grey inside cells
             for (int row = 0; row < BOARD_SIZE; row++) {
                 for (int col = 0; col < BOARD_SIZE; col++) {
                     if (row == 0 || row == BOARD_SIZE - 1 || col == 0 || col == BOARD_SIZE - 1) {
@@ -412,23 +413,23 @@ public class BoardGameGUI extends JFrame {
                         g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                     } else if (row == 1 && col == 1) {
                         // Top-left corner inside the 32x32 grid
-                        g.setColor(Color.BLUE);
+                        g.setColor(Color.WHITE); // Change to white
                         g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                     } else if (row == 1 && col == BOARD_SIZE - 2) {
                         // Top-right corner inside the 32x32 grid
-                        g.setColor(Color.BLUE);
+                        g.setColor(Color.WHITE); // Change to white
                         g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                     } else if (row == BOARD_SIZE - 2 && col == 1) {
                         // Bottom-left corner inside the 32x32 grid
-                        g.setColor(Color.BLUE);
+                        g.setColor(Color.WHITE); // Change to white
                         g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                     } else if (row == BOARD_SIZE - 2 && col == BOARD_SIZE - 2) {
                         // Bottom-right corner inside the 32x32 grid
-                        g.setColor(Color.BLUE);
+                        g.setColor(Color.WHITE); // Change to white
                         g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                     } else {
-                        // Light green inside cells
-                        g.setColor(new Color(144, 238, 144)); // Light green
+                        // Light grey inside cells
+                        g.setColor(new Color(211, 211, 211)); // Light grey
                         g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                     }
                     g.setColor(Color.BLACK); // Set the color for the grid lines
@@ -442,15 +443,16 @@ public class BoardGameGUI extends JFrame {
                     reward.draw(g, CELL_SIZE);
                 }
             }
-            
+
             for (Wall wall : walls) {
                 wall.draw(g, CELL_SIZE);
             }
-            
+
             drawEntranceExitImages(g);
             drawImage(g, entranceLocation, "entrance.png");
             drawImage(g, exitLocation, "exit.png");
         }
+
 
         private void drawImage(Graphics g, Point location, String imageName) {
             if (location != null) {
