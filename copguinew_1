@@ -331,28 +331,40 @@ public class BoardGameGUI extends JFrame {
             // Clear existing walls
             walls.clear();
 
-            // Generate three random wall indices (1, 2, 3)
-            List<Integer> wallIndices = Arrays.asList(1, 2, 3);
-            Collections.shuffle(wallIndices);
+            // Number of walls for each type
+            int wallCountType1 = 29;  // Type 1
+            int wallCountType2 = 29;  // Type 2
+            int wallCountType3 = 29;  // Type 3
 
-            // Create three random wall instances
-            for (int i = 0; i < 3; i++) {
-                int wallIndex = wallIndices.get(i);
+            // Create walls for type 1
+            generateRandomWallsOfType(1, wallCountType1);
+
+            // Create walls for type 2
+            generateRandomWallsOfType(2, wallCountType2);
+
+            // Create walls for type 3
+            generateRandomWallsOfType(3, wallCountType3);
+
+            // Repaint the board
+            repaint();
+        }
+        
+        private void generateRandomWallsOfType(int wallIndex, int count) {
+            for (int i = 0; i < count; i++) {
                 int x, y;
                 do {
                     // Generate random coordinates for the wall
                     x = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
                     y = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
-                } while (isCellOccupied(x, y) || isCornerCell(x, y));
+                } while (isCellOccupied(x, y) || isCornerCell(x, y) || isWallInCell(x, y));
 
                 Wall wall = new Wall(x, y, wallIndex);
                 // Add the wall to the list of walls
                 walls.add(wall);
+                occupiedCells.add(new Point(x, y));
             }
-
-            // Repaint the board
-            repaint();
         }
+
         
         private class Wall implements Drawable {
             private transient Image image;
@@ -391,6 +403,16 @@ public class BoardGameGUI extends JFrame {
 			public void draw(Graphics g, int x, int y, int cellSize) {
 				// TODO Auto-generated method stub
 				
+			}
+
+			public int getX() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			public int getY() {
+				// TODO Auto-generated method stub
+				return 0;
 			}
         }
         
@@ -477,13 +499,22 @@ public class BoardGameGUI extends JFrame {
                 do {
                     row = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
                     col = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
-                } while (isCellOccupied(row, col) || isCornerCell(row, col));
+                } while (isCellOccupied(row, col) || isCornerCell(row, col) || isWallInCell(row, col));
 
                 AbstractReward.Reward reward = rewardType.createReward(col, row, null);
                 rewards.put(new Point(row, col), reward);
                 occupiedCells.add(new Point(row, col));
             }
             generateEntranceExitLocations();
+        }
+        
+        private boolean isWallInCell(int row, int col) {
+            for (Wall wall : walls) {
+                if (wall.getX() == col && wall.getY() == row) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private boolean isCornerCell(int row, int col) {
