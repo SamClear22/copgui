@@ -16,7 +16,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -208,57 +207,53 @@ class CandyReward extends AbstractReward {
 	 }
 }
 
-class Wall implements Serializable, Drawable {
-	    private static final long serialVersionUID = 1L;
-	    transient Image image;
-	    private int x, y;
-	    private int imageIndex;
-	
-	    public Wall(int x, int y, int imageIndex) {
-	        this.x = x;
-	        this.y = y;
-	        this.imageIndex = imageIndex;
-	        loadImage();
-	    }
-	
-	    @Override
-	    public void draw(Graphics g, int cellSize) {
-	        loadImage(); // Reload the image
-	        g.drawImage(image, x * cellSize, y * cellSize, cellSize, cellSize, null);
+class Wall implements Drawable {
+    private transient Image image;
+    private int x, y;
+    private int imageIndex; // Added imageIndex field
 
-	        // Optionally, draw the image index (for debugging purposes)
-	        g.setColor(Color.BLACK);
-	        g.drawString(String.valueOf(imageIndex), x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
-	    }
-	    
-	    @Override
-	    public void draw(Graphics g, int x, int y, int cellSize) {
-	        loadImage(); // Reload the image
-	        g.drawImage(image, x, y, cellSize, cellSize, null);
+    public Wall(int x, int y, int imageIndex) {
+        this.x = x;
+        this.y = y;
+        this.imageIndex = imageIndex;
+        loadImage(); // Call loadImage to ensure the image is loaded
+    }
 
-	        // Optionally, draw the image index (for debugging purposes)
-	        g.setColor(Color.BLACK);
-	        g.drawString(String.valueOf(imageIndex), x + cellSize / 2, y + cellSize / 2);
-	    }
-	
-	    private void loadImage() {
-	        if (image == null) {
-	            // Load the image for the wall
-	            String imageName = "wall.png"; // You may want to change this based on your naming convention
-	            try {
-	                image = ImageIO.read(getClass().getResource("/copProject_images/" + imageName));
-	            } catch (IOException e) {
-	                System.err.println("Failed to load image: " + imageName);
-	                e.printStackTrace();
-	            }
-	        }
-	    }
+    @Override
+    public void draw(Graphics g, int cellSize) {
+        // Draw the wall image at the specified position
+        g.drawImage(image, x * cellSize, y * cellSize, cellSize, cellSize, null);
+    }
 
-		public int getImageIndex() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
+    private void loadImage() {
+        // Load the image based on the imageIndex
+        String imageName = "wall_" + imageIndex + ".png";
+        String imagePath = "/copProject_images/" + imageName;
+        try {
+            // Print the path for debugging
+            System.out.println("Loading image from path: " + imagePath);
+            image = ImageIO.read(getClass().getResource(imagePath));
+        } catch (IOException e) {
+            System.err.println("Failed to load image: " + imageName);
+            e.printStackTrace();
+        }
+    }
+
+    // Add getters for x and y
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    @Override
+    public void draw(Graphics g, int x, int y, int cellSize) {
+        // TODO Auto-generated method stub
+    }
 }
+
 
 public class BoardGameGUI extends JFrame {
 
@@ -326,7 +321,7 @@ public class BoardGameGUI extends JFrame {
     	
 		private static final long serialVersionUID = 1L;
 		private static final int CELL_SIZE = 20;
-        private static final int BOARD_SIZE = 33; // Increase the size to 33x33
+		private static final int BOARD_SIZE = 34; // Increase the size to 33x33
         private static final Color BORDER_CELL_COLOR = new Color(50, 50, 50); // Darker gray
         
         private Random random = new Random();
@@ -335,70 +330,116 @@ public class BoardGameGUI extends JFrame {
         private List<Wall> walls = new ArrayList<>();
         private Point entranceLocation;
         private Point exitLocation;
-        
+       
         public void generateRandomRewards() {
-            generateRandomReward(new CoinReward(), 16);
-            generateRandomReward(new FruitReward(), 16);
-            generateRandomReward(new CandyReward(), 16);
-            generateRandomWalls();
+            // Define specific locations for walls
+            List<Point> wallLocationsType1 = Arrays.asList(
+            		new Point(3, 8), new Point(3, 15), new Point(3, 21), new Point(3, 27),
+            	    new Point(5, 8), new Point(5, 15), new Point(5, 21), new Point(5, 27),
+            	    new Point(7, 8), new Point(7, 15), new Point(7, 21), new Point(7, 27),
+            	    new Point(9, 8), new Point(9, 15), new Point(9, 21), new Point(9, 27),
+            	    new Point(6, 8), new Point(8, 15), new Point(10, 21), new Point(12, 27),
+            	    new Point(11, 8), new Point(11, 15), new Point(11, 21), new Point(11, 27),
+            	    new Point(13, 8), new Point(13, 15), new Point(13, 21), new Point(13, 27),
+            	    new Point(15, 8), new Point(15, 15), new Point(15, 21), new Point(15, 27),
+            	    new Point(17, 8), new Point(17, 15), new Point(17, 21), new Point(17, 27),
+            	    new Point(19, 8), new Point(19, 15), new Point(19, 21), new Point(19, 27),
+            	    new Point(21, 8), new Point(21, 15), new Point(21, 21), new Point(21, 27),
+            	    new Point(23, 8), new Point(23, 15), new Point(23, 21), new Point(23, 27),
+            	    new Point(25, 8), new Point(25, 15), new Point(25, 21), new Point(25, 27),
+            	    new Point(27, 8), new Point(27, 15), new Point(27, 21), new Point(27, 27),
+            	    new Point(29, 8), new Point(29, 15), new Point(29, 21), new Point(29, 27),
+            	    new Point(14, 8), new Point(16, 15), new Point(18, 21), new Point(20, 27),
+            	    new Point(22, 8), new Point(24, 15), new Point(26, 21), new Point(28, 27),
+            	    new Point(30, 8), new Point(30, 15), new Point(31, 21), new Point(31, 27),
+            	    new Point(30, 5), new Point(30, 11), new Point(30, 17), new Point(30, 23), new Point(30, 29),
+            	    new Point(31, 3), new Point(30, 13), new Point(28, 19), new Point(26, 25), new Point(24, 31),
+            	    new Point(18, 31), new Point(16, 31), new Point(14, 27), new Point(12, 21), new Point(10, 15)
+            );
+
+            List<Point> wallLocationsType2 = Arrays.asList(
+            		// Previous points remain unchanged
+            	    new Point(2, 7), new Point(2, 14), new Point(2, 20), new Point(2, 26),
+            	    new Point(4, 7), new Point(4, 14), new Point(4, 20), new Point(4, 26),
+            	    new Point(6, 7), new Point(6, 14), new Point(6, 20), new Point(6, 26),
+            	    new Point(8, 7), new Point(8, 14), new Point(8, 20), new Point(8, 26),
+            	    new Point(5, 7), new Point(7, 14), new Point(9, 20), new Point(11, 26),
+            	    new Point(10, 7), new Point(10, 14), new Point(10, 20), new Point(10, 26),
+            	    new Point(12, 7), new Point(12, 14), new Point(12, 20), new Point(12, 26),
+            	    new Point(14, 7), new Point(14, 14), new Point(14, 20), new Point(14, 26),
+            	    new Point(16, 7), new Point(16, 14), new Point(16, 20), new Point(16, 26),
+            	    new Point(18, 7), new Point(18, 14), new Point(18, 20), new Point(18, 26),
+            	    new Point(20, 7), new Point(20, 14), new Point(20, 20), new Point(20, 26),
+            	    new Point(22, 7), new Point(22, 14), new Point(22, 20), new Point(22, 26),
+            	    new Point(24, 7), new Point(24, 14), new Point(24, 20), new Point(24, 26),
+            	    new Point(26, 7), new Point(26, 14), new Point(26, 20), new Point(26, 26),
+            	    new Point(28, 7), new Point(28, 14), new Point(28, 20), new Point(28, 26),
+            	    new Point(30, 7), new Point(30, 14), new Point(30, 20), new Point(30, 26),
+            	    new Point(13, 7), new Point(15, 14), new Point(17, 20), new Point(19, 26),
+            	    new Point(21, 7), new Point(23, 14), new Point(25, 20), new Point(27, 26),
+            	    new Point(29, 7), new Point(31, 14), new Point(31, 20), new Point(31, 26),
+            	    new Point(31, 4), new Point(31, 10), new Point(31, 16), new Point(31, 22), new Point(29, 2),
+            	    new Point(31, 5), new Point(29, 12), new Point(27, 18), new Point(25, 24), new Point(23, 39)
+            );
+
+            List<Point> wallLocationsType3 = Arrays.asList(
+            		new Point(1, 5), new Point(1, 12), new Point(1, 18), new Point(1, 24), new Point(1, 29),
+                    new Point(3, 5), new Point(3, 12), new Point(3, 18), new Point(3, 24), new Point(3, 30),
+                    new Point(5, 5), new Point(5, 12), new Point(5, 18), new Point(5, 24), new Point(5, 30),
+                    new Point(7, 5), new Point(7, 12), new Point(7, 18), new Point(7, 24), new Point(7, 30),
+                    new Point(9, 5), new Point(9, 12), new Point(9, 18), new Point(9, 24), new Point(9, 30),
+                    new Point(11, 5), new Point(11, 12), new Point(11, 18), new Point(11, 24), new Point(11, 30),
+                    new Point(13, 5), new Point(13, 12), new Point(13, 18), new Point(13, 24), new Point(13, 30),
+                    new Point(15, 5), new Point(15, 12), new Point(15, 18), new Point(15, 24), new Point(15, 30),
+                    new Point(17, 5), new Point(17, 12), new Point(17, 18), new Point(17, 24), new Point(17, 30),
+                    new Point(19, 5), new Point(19, 12), new Point(19, 18), new Point(19, 24), new Point(19, 30),
+                    new Point(21, 5), new Point(21, 12), new Point(21, 18), new Point(21, 24), new Point(21, 30),
+                    new Point(23, 5), new Point(23, 12), new Point(23, 18), new Point(23, 24), new Point(23, 30),
+                    new Point(25, 5), new Point(25, 12), new Point(25, 18), new Point(25, 24), new Point(25, 30),
+                    new Point(27, 5), new Point(27, 12), new Point(27, 18), new Point(27, 24), new Point(27, 30),
+                    new Point(29, 5), new Point(29, 12), new Point(29, 18), new Point(29, 24), new Point(29, 30),
+                    new Point(31, 5), new Point(31, 12), new Point(31, 18), new Point(31, 24), new Point(31, 29),
+                    new Point(2, 7), new Point(2, 14), new Point(2, 20), new Point(2, 26),
+                    new Point(4, 7), new Point(4, 14), new Point(4, 20)
+            );
+
+            generateWallsAtLocations(wallLocationsType1, 1);
+            generateWallsAtLocations(wallLocationsType2, 2);
+            generateWallsAtLocations(wallLocationsType3, 3);
+            
+            generateRandomRewardsOfType(new CoinReward(), 16, wallLocationsType1);
+            generateRandomRewardsOfType(new FruitReward(), 16, wallLocationsType2);
+            generateRandomRewardsOfType(new CandyReward(), 16, wallLocationsType3);
+            
+            generateEntranceExitLocations();
+        }
+
+        private void generateRandomRewardsOfType(AbstractReward rewardType, int count, List<Point> wallLocations) {
+            for (int i = 0; i < count; i++) {
+                int row, col;
+                do {
+                    row = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
+                    col = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
+                } while (isCellOccupied(row, col) || isCornerCell(row, col) || isWallInCell(row, col) || wallLocations.contains(new Point(row, col)));
+
+                AbstractReward.Reward reward = rewardType.createReward(col, row, null);
+                rewards.put(new Point(row, col), reward);
+                occupiedCells.add(new Point(row, col));
+            }
         }
         
-        private void generateRandomWalls() {
-            // Clear existing walls
-            walls.clear();
-
-            // Number of walls for each type
-            int wallCountType1 = 29;  // Type 1
-            int wallCountType2 = 29;  // Type 2
-            int wallCountType3 = 29;  // Type 3
-
-            // Create walls for type 1
-            generateRandomWallsOfType(1, wallCountType1);
-
-            // Create walls for type 2
-            generateRandomWallsOfType(2, wallCountType2);
-
-            // Create walls for type 3
-            generateRandomWallsOfType(3, wallCountType3);
+        private void generateWallsAtLocations(List<Point> wallLocations, int wallIndex) {
+            // Add walls at specified locations without clearing existing walls
+            for (Point location : wallLocations) {
+                Wall wall = new Wall(location.x, location.y, wallIndex);
+                walls.add(wall);
+                occupiedCells.add(location);
+            }
 
             // Repaint the board
             repaint();
         }
-        
-        private void generateRandomWallsOfType(int wallIndex, int count) {
-            for (int i = 0; i < count; i++) {
-                int x, y;
-                do {
-                    // Generate random coordinates for the wall
-                    x = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
-                    y = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
-                } while (isCellOccupied(x, y) || isCornerCell(x, y) || isWallInCell(x, y) || isAroundWhiteSquare(x, y));
 
-                // Use the new createWall method with the appropriate imageIndex
-                BoardPanel.Wall wall = createWall(x, y, wallIndex);
-                // Add the wall to the list of walls
-                boardPanel.walls.add(wall);
-                boardPanel.occupiedCells.add(new Point(y, x)); // Note the change in the order of x and y
-            }
-        }
-
-        private Wall createWall(int x, int y, int imageIndex) {
-            return new Wall(x, y, imageIndex);
-        }
-        
-        private boolean isAroundWhiteSquare(int x, int y) {
-            for (int row = -1; row <= 1; row++) {
-                for (int col = -1; col <= 1; col++) {
-                    int checkX = x + col;
-                    int checkY = y + row;
-                    if (isCornerCell(checkX, checkY)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-        
         private class Wall implements Drawable {
             private transient Image image;
             private int x, y;
@@ -420,11 +461,17 @@ public class BoardGameGUI extends JFrame {
             private void loadImage() {
                 // Load the image based on the imageIndex
                 String imageName = "wall_" + imageIndex + ".png";
-                String imagePath = "/copProject_images/" + imageName;
+                String imagePath = "copProject_images/" + imageName;
                 try {
                     // Print the path for debugging
                     System.out.println("Loading image from path: " + imagePath);
                     image = ImageIO.read(getClass().getResource(imagePath));
+
+                    // Check if the image is loaded successfully
+                    if (image == null) {
+                        System.err.println("Failed to load image: " + imageName);
+                        // Handle the failure, e.g., use a default image
+                    }
                 } catch (IOException e) {
                     System.err.println("Failed to load image: " + imageName);
                     e.printStackTrace();
@@ -465,20 +512,8 @@ public class BoardGameGUI extends JFrame {
                         // Dark grey border
                         g.setColor(BORDER_CELL_COLOR);
                         g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                    } else if (row == 1 && col == 1) {
-                        // Top-left corner inside the 32x32 grid
-                        g.setColor(Color.WHITE); // Change to white
-                        g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                    } else if (row == 1 && col == BOARD_SIZE - 2) {
-                        // Top-right corner inside the 32x32 grid
-                        g.setColor(Color.WHITE); // Change to white
-                        g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                    } else if (row == BOARD_SIZE - 2 && col == 1) {
-                        // Bottom-left corner inside the 32x32 grid
-                        g.setColor(Color.WHITE); // Change to white
-                        g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                    } else if (row == BOARD_SIZE - 2 && col == BOARD_SIZE - 2) {
-                        // Bottom-right corner inside the 32x32 grid
+                    } else if ((row == 1 || row == BOARD_SIZE - 2) && (col == 1 || col == BOARD_SIZE - 2)) {
+                        // Inside corners of the 34x34 grid
                         g.setColor(Color.WHITE); // Change to white
                         g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                     } else {
@@ -507,7 +542,6 @@ public class BoardGameGUI extends JFrame {
             drawImage(g, exitLocation, "exit.png");
         }
 
-
         private void drawImage(Graphics g, Point location, String imageName) {
             if (location != null) {
                 try {
@@ -523,21 +557,6 @@ public class BoardGameGUI extends JFrame {
         private void drawEntranceExitImages(Graphics g) {
             drawImage(g, entranceLocation, "entrance.png");
             drawImage(g, exitLocation, "exit.png");
-        }
-        
-        private void generateRandomReward(AbstractReward rewardType, int count) {
-            for (int i = 0; i < count; i++) {
-                int row, col;
-                do {
-                    row = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
-                    col = random.nextInt(BOARD_SIZE - 2) + 1; // Exclude the border
-                } while (isCellOccupied(row, col) || isCornerCell(row, col) || isWallInCell(row, col));
-
-                AbstractReward.Reward reward = rewardType.createReward(col, row, null);
-                rewards.put(new Point(row, col), reward);
-                occupiedCells.add(new Point(row, col));
-            }
-            generateEntranceExitLocations();
         }
         
         private boolean isWallInCell(int row, int col) {
@@ -558,7 +577,7 @@ public class BoardGameGUI extends JFrame {
         }
         
         private void generateEntranceExitLocations() {
-        	List<Point> cornerLocations = Arrays.asList(
+            List<Point> cornerLocations = Arrays.asList(
                     new Point(1, 1),                  // Top-left corner inside the 32x32 grid
                     new Point(1, BOARD_SIZE - 2),    // Top-right corner inside the 32x32 grid
                     new Point(BOARD_SIZE - 2, 1),    // Bottom-left corner inside the 32x32 grid
@@ -595,8 +614,7 @@ public class BoardGameGUI extends JFrame {
         boardPanel.repaint(); // Repaint the board
     }
     
-    @SuppressWarnings("unchecked")
-	private void loadBoardFromFile() {
+    private void loadBoardFromFile() {
         JFileChooser fileChooser = new JFileChooser();
         int result = fileChooser.showOpenDialog(this);
 
@@ -607,6 +625,7 @@ public class BoardGameGUI extends JFrame {
                 ObjectInputStream in = new ObjectInputStream(new FileInputStream(filePath));
 
                 // Read the object from the file
+                @SuppressWarnings("unchecked")
                 List<LoadedReward> loadedRewards = (List<LoadedReward>) in.readObject();
                 in.close();
 
@@ -618,27 +637,22 @@ public class BoardGameGUI extends JFrame {
                     String rewardType = loadedReward.getRewardType();
                     int x = loadedReward.getX();
                     int y = loadedReward.getY();
-                    int wallImageIndex = loadedReward.getWallImageIndex(); // Retrieve the wallImageIndex
-
                     AbstractReward.Reward reward = createReward(rewardType, x, y);
-                    Wall wall = (rewardType == null) ? new Wall(x, y, wallImageIndex) : null;
 
                     if (loadedReward.isEntrance()) {
-                        boardPanel.entranceLocation = new Point(y, x); // Corrected this line
+                        new Point(y, x);
                     } else if (loadedReward.isExit()) {
-                        boardPanel.exitLocation = new Point(y, x); // Corrected this line
+                        new Point(y, x);
                     }
 
                     if (reward != null) {
                         boardPanel.rewards.put(new Point(y, x), reward);
                         boardPanel.occupiedCells.add(new Point(y, x));
-                    } else if (wall != null) {
-                        boardPanel.walls.addAll((Collection<? extends copProject.BoardGameGUI.BoardPanel.Wall>) wall);
-                        boardPanel.occupiedCells.add(new Point(y, x));
                     } else {
                         System.err.println("Failed to create reward for type: " + rewardType);
                     }
                 }
+
                 // Repaint the board
                 boardPanel.repaint();
 
@@ -670,21 +684,23 @@ public class BoardGameGUI extends JFrame {
         private int y;
         private boolean isEntrance;
         private boolean isExit;
+        private String type;
 
-        public LoadedReward(int x, int y, String rewardType, boolean isEntrance, boolean isExit, int wallImageIndex) {
+        // Constructor adapted to use parameters directly
+        public LoadedReward(int x, int y, String rewardType, boolean isEntrance, boolean isExit, String type) {
             this.x = x;
             this.y = y;
             this.rewardType = rewardType;
             this.isEntrance = isEntrance;
             this.isExit = isExit;
+            this.type = type;
+        }
+        
+        public String getType() {
+            return type;
         }
 
-		public int getWallImageIndex() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		public String getRewardType() {
+        public String getRewardType() {
             return rewardType;
         }
 
@@ -703,7 +719,6 @@ public class BoardGameGUI extends JFrame {
         public boolean isExit() {
             return isExit;
         }
-        
     }
     
     private void saveBoardToFile() {
@@ -720,14 +735,12 @@ public class BoardGameGUI extends JFrame {
                 for (Map.Entry<Point, AbstractReward.Reward> entry : boardPanel.rewards.entrySet()) {
                     Point position = entry.getKey();
                     AbstractReward.Reward reward = entry.getValue();
-                    Wall wall = getWallAtPosition(position.x, position.y);
                     boolean isEntrance = position.equals(boardPanel.entranceLocation);
                     boolean isExit = position.equals(boardPanel.exitLocation);
-                    LoadedReward loadedReward = new LoadedReward(position.x, position.y, reward.getType(), isEntrance, isExit,
-                        (wall != null) ? wall.getImageIndex() : -1);
+                    LoadedReward loadedReward = new LoadedReward(position.x, position.y, reward.getType(), isEntrance, isExit, filePath);
                     loadedRewards.add(loadedReward);
                 }
-                
+
                 ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filePath));
                 out.writeObject(loadedRewards); // Save the rewards information
                 out.close();
@@ -738,9 +751,4 @@ public class BoardGameGUI extends JFrame {
             }
         }
     }
-
-	private Wall getWallAtPosition(int x, int y) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
