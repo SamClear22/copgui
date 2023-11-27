@@ -26,7 +26,6 @@ import java.util.List;
 
 interface Drawable {
     void draw(Graphics g, int x, int y, int cellSize);
-
     void draw(Graphics g, int cellSize);
 }
 
@@ -67,8 +66,8 @@ abstract class AbstractReward implements Serializable, Drawable {
 
         private void loadImage() {
             if (image == null) {
-                String imageName = "wall.png"; // Default image name
-                String imagePath = "/copProject_images/" + imageName;
+                String imageName = null;
+				String imagePath = "/copProject_images/" + imageName;
                 try {
                     image = ImageIO.read(getClass().getResource(imagePath));
                 } catch (IOException e) {
@@ -102,7 +101,6 @@ class CoinReward extends AbstractReward {
 
     @Override
     public void draw(Graphics g, int cellSize) {
-        // Leave it empty, as it relies on the implementation in AbstractReward.Reward
     }
 
     @Override
@@ -130,7 +128,6 @@ class FruitReward extends AbstractReward {
 
     @Override
     public void draw(Graphics g, int cellSize) {
-        // Leave it empty, as it relies on the implementation in AbstractReward.Reward
     }
 
     @Override
@@ -158,7 +155,6 @@ class CandyReward extends AbstractReward {
 
     @Override
     public void draw(Graphics g, int cellSize) {
-        // Leave it empty, as it relies on the implementation in AbstractReward.Reward
     }
 
     @Override
@@ -197,14 +193,11 @@ public class BoardGameGUI extends JFrame {
         designItem.addActionListener(e -> generateNewBoard());
         loadItem.addActionListener(e -> loadBoardFromFile());
         saveItem.addActionListener(e -> saveBoardToFile());
-
         menu.add(designItem);
         menu.add(loadItem);
         menu.add(saveItem);
         menuBar.add(menu);
-
         setJMenuBar(menuBar);
-
         // Set frame properties
         setSize(800, 800);
         setLocationRelativeTo(null);
@@ -339,7 +332,6 @@ public class BoardGameGUI extends JFrame {
                 Point position = entry.getKey();
                 AbstractReward.Reward reward = entry.getValue();
                 if (position.equals(entranceLocation) || position.equals(exitLocation)) {
-                    // Set properties directly in Reward without casting
                     reward.isEntrance = position.equals(entranceLocation);
                     reward.isExit = position.equals(exitLocation);
                 }
@@ -375,9 +367,7 @@ public class BoardGameGUI extends JFrame {
                 for (LoadedReward loadedReward : loadedRewards) {
                     String rewardType = loadedReward.getRewardType();
                     int x = loadedReward.getX();
-                    int y = loadedReward.getY();
-                   
-
+                    int y = loadedReward.getY();               
                     AbstractReward.Reward reward = createReward(rewardType, x, y);
 
                     if (loadedReward.isEntrance()) {
@@ -393,7 +383,6 @@ public class BoardGameGUI extends JFrame {
                         System.err.println("Failed to create reward for type: " + rewardType);
                     }
                 }
-
                 // Repaint the board
                 boardPanel.repaint();
                 JOptionPane.showMessageDialog(this, "Board design loaded successfully.");
@@ -425,7 +414,6 @@ public class BoardGameGUI extends JFrame {
         private boolean isEntrance;
         private boolean isExit;
 
-        // Constructor adapted to use parameters directly
         public LoadedReward(int x, int y, String rewardType, boolean isEntrance, boolean isExit) {
             this.x = x;
             this.y = y;
@@ -460,11 +448,9 @@ public class BoardGameGUI extends JFrame {
         int result = fileChooser.showSaveDialog(this);
 
         if (result == JFileChooser.APPROVE_OPTION) {
-            // User selected a file
             try {
                 String filePath = fileChooser.getSelectedFile().getAbsolutePath();
                 List<LoadedReward> loadedRewards = new ArrayList<>();
-
                 // Convert the existing rewards to LoadedReward objects
                 for (Map.Entry<Point, AbstractReward.Reward> entry : boardPanel.rewards.entrySet()) {
                     Point position = entry.getKey();
