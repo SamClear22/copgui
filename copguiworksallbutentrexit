@@ -84,7 +84,7 @@ abstract class AbstractReward implements Serializable, Drawable {
     }
 }
 
-class Wall1Reward extends AbstractReward {
+class Wall1Reward extends AbstractReward implements Serializable {
     private static final long serialVersionUID = 5L;
 
     @Override
@@ -92,7 +92,60 @@ class Wall1Reward extends AbstractReward {
         try {
             ImageIcon icon = new ImageIcon("wall1.png");
             Image image = icon.getImage();
-            return new Reward(image, x, y, "Wall");
+            return new Reward(image, x, y, "Wall1");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    @Override
+    public void draw(Graphics g, int cellSize) {
+    }
+
+    @Override
+    public void draw(Graphics g, int x, int y, int cellSize) {
+        Reward reward = createReward(x, y, null);
+        reward.draw(g, cellSize);
+    }
+}
+
+class Wall2Reward extends AbstractReward implements Serializable {
+    private static final long serialVersionUID = 6L;
+
+    @Override
+    protected Reward createReward(int x, int y, String rewardType) {
+        try {
+            ImageIcon icon = new ImageIcon("wall2.png"); // Change to the correct image file
+            Image image = icon.getImage();
+            return new Reward(image, x, y, "Wall2");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public void draw(Graphics g, int cellSize) {
+    }
+
+    @Override
+    public void draw(Graphics g, int x, int y, int cellSize) {
+        Reward reward = createReward(x, y, null);
+        reward.draw(g, cellSize);
+    }
+}
+
+class Wall3Reward extends AbstractReward implements Serializable {
+    private static final long serialVersionUID = 7L;
+
+    @Override
+    protected Reward createReward(int x, int y, String rewardType) {
+        try {
+            ImageIcon icon = new ImageIcon("wall3.png");
+            Image image = icon.getImage();
+            return new Reward(image, x, y, "Wall3");
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -256,11 +309,12 @@ public class BoardGameGUI extends JFrame {
         private Point exitLocation;
 
         private void generateRandomRewards() {
-            // Modify the method to avoid placing rewards and walls in the white corners
             generateRandomReward(new CoinReward(), 16, false);
             generateRandomReward(new FruitReward(), 16, false);
             generateRandomReward(new CandyReward(), 16, false);
             generateRandomReward(new Wall1Reward(), 87, true);
+            generateRandomReward(new Wall2Reward(), 87, true);
+            generateRandomReward(new Wall3Reward(), 87, true);
             generateEntranceExitLocations();
         }
 
@@ -408,18 +462,21 @@ public class BoardGameGUI extends JFrame {
                 for (LoadedReward loadedReward : loadedRewards) {
                     String rewardType = loadedReward.getRewardType();
                     int x = loadedReward.getX();
-                    int y = loadedReward.getY();               
+                    int y = loadedReward.getY();
                     AbstractReward.Reward reward = createReward(rewardType, x, y);
 
                     if (loadedReward.isEntrance()) {
-                        new Point(y, x);
+                        boardPanel.entranceLocation = new Point(y, x);
                     } else if (loadedReward.isExit()) {
-                        new Point(y, x);
+                        boardPanel.exitLocation = new Point(y, x);
                     }
 
                     if (reward != null) {
                         boardPanel.rewards.put(new Point(y, x), reward);
                         boardPanel.occupiedCells.add(new Point(y, x));
+                        if (loadedReward.isWall1()) {
+                            reward.isWall = true;
+                        }
                     } else {
                         System.err.println("Failed to create reward for type: " + rewardType);
                     }
@@ -442,6 +499,12 @@ public class BoardGameGUI extends JFrame {
                 return new FruitReward().createReward(x, y, rewardType);
             case "Candy":
                 return new CandyReward().createReward(x, y, rewardType);
+            case "Wall1":
+                return new Wall1Reward().createReward(x, y, rewardType);
+            case "Wall2":
+                return new Wall2Reward().createReward(x, y, rewardType);
+            case "Wall3":
+                return new Wall3Reward().createReward(x, y, rewardType);
             default:
                 throw new IllegalArgumentException("Invalid reward type: " + rewardType);
         }
@@ -465,7 +528,12 @@ public class BoardGameGUI extends JFrame {
             this.isWall = isWall;
         }
 
-        public String getRewardType() {
+        public boolean isWall1() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		public String getRewardType() {
             return rewardType;
         }
 
@@ -484,7 +552,7 @@ public class BoardGameGUI extends JFrame {
         public boolean isExit() {
             return isExit;
         }
-        
+
         public boolean isWall() {
             return isWall;
         }
@@ -498,13 +566,14 @@ public class BoardGameGUI extends JFrame {
             try {
                 String filePath = fileChooser.getSelectedFile().getAbsolutePath();
                 List<LoadedReward> loadedRewards = new ArrayList<>();
+                
                 // Convert the existing rewards to LoadedReward objects
                 for (Map.Entry<Point, AbstractReward.Reward> entry : boardPanel.rewards.entrySet()) {
                     Point position = entry.getKey();
                     AbstractReward.Reward reward = entry.getValue();
                     boolean isEntrance = position.equals(boardPanel.entranceLocation);
                     boolean isExit = position.equals(boardPanel.exitLocation);
-                    boolean isWall = reward.isWall;
+                    boolean isWall = reward.getType().startsWith("Wall"); // Check if it's a wall reward
                     LoadedReward loadedReward = new LoadedReward(position.x, position.y, reward.getType(), isEntrance, isExit, isWall);
                     loadedRewards.add(loadedReward);
                 }
